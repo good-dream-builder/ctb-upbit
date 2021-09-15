@@ -295,11 +295,11 @@ public class BuyTrx implements BaseTrx {
             }
 
             // 음수 경합은 대상이 아니다.
-            if (el.getBuyScore() > 0 && el.getStopLossScore() < 1) {
-                targetCoinPolicyResultList.add(el);
-            }
-            // TODO 모든 대상을 추가한다. 취소
-            //targetCoinPolicyResultList.add(el);
+//            if (el.getBuyScore() > 0 && el.getStopLossScore() < 1) {
+//                targetCoinPolicyResultList.add(el);
+//            }
+            // TODO 모든 대상을 추가한다.
+            targetCoinPolicyResultList.add(el);
         }
 
         coinPolicyResultList = targetCoinPolicyResultList;
