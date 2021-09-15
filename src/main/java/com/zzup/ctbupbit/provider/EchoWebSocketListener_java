@@ -1,0 +1,121 @@
+package com.zzup.ctb;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.SneakyThrows;
+import okhttp3.Response;
+import okhttp3.WebSocket;
+import okhttp3.WebSocketListener;
+import okio.ByteString;
+
+import java.io.ByteArrayInputStream;
+import java.io.ObjectInput;
+import java.io.ObjectInputStream;
+
+class EchoWebSocketListener extends WebSocketListener {
+    private static final int NORMAL_CLOSURE_STATUS = 1000;
+    @Override
+    public void onOpen(WebSocket webSocket, Response response) {
+        output("onOpen : " + response);
+
+        webSocket.send("[{\"ticket\":\"test\"},{\"type\":\"ticker\",\"codes\":[\"KRW-BTC\"]}]");
+//        webSocket.close(NORMAL_CLOSURE_STATUS, "Goodbye !");
+    }
+    @SneakyThrows
+    @Override
+    public void onMessage(WebSocket webSocket, String text) {
+        ObjectMapper mapper = new ObjectMapper();
+        String jsonStr = mapper.writeValueAsString(text);
+
+        output("Receiving : " + jsonStr);
+    }
+    @SneakyThrows
+    @Override
+    public void onMessage(WebSocket webSocket, ByteString bytes) {
+
+//        ByteArrayInputStream bis = new ByteArrayInputStream(.toByteArray());
+//        ObjectInput in = new ObjectInputStream(bis);
+//        RealTimeData realTimeData = (RealTimeData) in.readObject();
+
+        ObjectMapper mapper = new ObjectMapper();
+        RealTimeData realTimeData = mapper.readValue(bytes.utf8(), RealTimeData.class);
+
+        output("Receiving bytes : " + realTimeData.toString());
+//        output("Receiving bytes : " + realTimeData.toString());
+
+//        output("Receiving bytes : " + realTimeData.toString());
+//        output("Receiving bytes : " + bytes.hex());
+    }
+    @Override
+    public void onClosing(WebSocket webSocket, int code, String reason) {
+        webSocket.close(NORMAL_CLOSURE_STATUS, null);
+        output("Closing : " + code + " / " + reason);
+    }
+    @Override
+    public void onFailure(WebSocket webSocket, Throwable t, Response response) {
+        output("Error : " + t.getMessage());
+    }
+
+    public void output(String msg) {
+        System.out.println(msg);
+    }
+}
+
+
+//        RestTemplateBuilder builder = new RestTemplateBuilder();
+//        RestTemplate restTemplate = builder.build();
+//        String quote = restTemplate.getForObject(
+//                "https://api.upbit.com/v1/market/all", String.class);
+//        logger.info(quote);
+
+
+
+
+//        "2021-02-23T03:02:13+09:00"
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", Locale.KOREA);
+        format.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+        for (OrderResp orderResp : orderRespList) {
+            CoinType coin = getCoinType(orderResp.getMarket());
+
+            AccountBook accountBook = new AccountBook();
+            accountBook.setTime(format.parse(orderResp.getCreated_at()));
+            accountBook.setDeal(DealType.BUY);
+            accountBook.setCoin(coin);
+            accountBook.setPrice(orderResp.getPrice());
+            accountBook.setAmount(orderResp.getVolume());
+            accountBook.setProfit("0");
+            accountBook.setDealUUID(orderResp.getUuid());
+
+            Double totalAmount = 0.0;
+            Double avgPrice = 0.0;
+            Double curAmt = Double.parseDouble(orderResp.getVolume());
+            Double curPrice = Double.parseDouble(orderResp.getPrice());
+            AccountBook prevAccountBook = accountBookRepository.findFirstByCoinOrderByTimeDesc(coin);
+            if (prevAccountBook != null) {
+                logger.debug("prevAccountBook = " + prevAccountBook.toString());
+                Double prevTotalAmt = Double.parseDouble(prevAccountBook.getTotalAmount());
+                Double prevAvgPrice = Double.parseDouble(prevAccountBook.getAvgPrice());
+
+                totalAmount = prevTotalAmt + curAmt;
+                logger.debug("위)totalAmount = " + totalAmount);
+
+                Double prevSum = prevTotalAmt * prevAvgPrice;
+                Double curSum = curAmt * curPrice;
+                avgPrice = (prevSum + curSum) / totalAmount;
+                logger.debug("위)prevSum = " + prevSum);
+                logger.debug("위)curSum = " + curSum);
+                logger.debug("위)avgPrice = " + avgPrice);
+            } else {
+                totalAmount = curAmt;
+                logger.debug("아래)totalAmount = " + totalAmount);
+                avgPrice = curPrice;
+                logger.debug("아래)avgPrice = " + avgPrice);
+            }
+
+            accountBook.setTotalAmount(String.valueOf(totalAmount));
+            accountBook.setAvgPrice(String.valueOf(avgPrice));
+            logger.debug("accountBook = " + accountBook.toString());
+
+            accountBookRepository.save(accountBook);
+        }

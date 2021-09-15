@@ -1,0 +1,52 @@
+spring:
+#  profiles:
+#    active: prod
+
+  devtools:
+    livereload:
+      enabled: true
+
+  batch:
+    initialize-schema: ALWAYS
+
+  thymeleaf:
+    cache: false
+
+  session:
+    store-type: none
+
+  resources:
+    static-locations:
+
+  jackson:
+    serialization:
+      fail-on-empty-beans: false
+    property-naming-strategy: LOWER_CAMEL_CASE
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://49.50.162.56:3306/db_ctb_upbit?useUnicode=true&characterEncoding=utf8&autoReconnect=true&serverTimezone=Asia/Seoul&useSSL=false
+    username: psj
+    password: 1
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    generate-ddl: true
+    database: mysql
+    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
+
+logging:
+  pattern:
+    file: "[%d{yyyy:MM:dd HH:mm:ss.SSS}][%-5level][%logger.%method:line%line] - %msg%n"
+    rolling-file-name: "/root/ctb_upbit_log/ctb_log.%d{yyyy-MM-dd}.%i"
+  file:
+    path: /root/ctb_upbit_log
+#  config: classpath:logback-spring_xml
+  level:
+    com:
+      zzup:
+        ctb: debug
+    org:
+      springframework:
+        web: debug
