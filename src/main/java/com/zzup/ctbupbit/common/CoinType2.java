@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 public enum CoinType2 {
     BTC("BTC"), // 비트코인
     ETH("ETH"), // 이더리움
+    SOL("SOL"), // 솔라나
     NEO("NEO"), // 네오
     MTL("MTL"), // 메탈
     LTC("LTC"), // 라이트코인
@@ -107,7 +108,7 @@ public enum CoinType2 {
     PCI("PCI"), // 페이코인
     STRAX("STRAX"), // 스트라티스
     AQT("AQT"), // 알파쿼크
-    BCHA("BCHA"), // 비트코인캐시에이비씨
+    XEC("XEC"), // 비트코인캐시에이비씨, 이캐시
     GLM("GLM"), // 골렘
     QTCON("QTCON"), // 퀴즈톡
     SSX("SSX"), // 썸씽

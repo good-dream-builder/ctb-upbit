@@ -11,7 +11,7 @@ public enum CoinType3 {
     ATOM("ATOM"), // 코스모스
     BAT("BAT"), // 베이직어텐션토큰
     BCH("BCH"), // 비트코인캐시
-    BCHA("BCHA"), // 비트코인캐시에이비씨
+    XEC("XEC"), // 비트코인캐시에이비씨, 이캐시
     BORA("BORA"), // 보라
     BSV("BSV"), // 비트코인에스브이
     BTC("BTC"), // 비트코인
