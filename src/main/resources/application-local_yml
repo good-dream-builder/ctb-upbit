@@ -3,8 +3,8 @@ spring:
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://49.50.162.56:3306/db_ctb_upbit?useUnicode=true&characterEncoding=utf8&autoReconnect=true&serverTimezone=Asia/Seoul&useSSL=false
-    username: psj
+    url: jdbc:mysql://127.0.0.1:3306/db_ctb_upbit?useUnicode=true&characterEncoding=utf8&autoReconnect=true&serverTimezone=Asia/Seoul&useSSL=false
+    username: root
     password: 1
 
   jpa:

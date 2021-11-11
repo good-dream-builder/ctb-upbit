@@ -46,7 +46,7 @@ logging:
   level:
     com:
       zzup:
-        ctb: debug
+        ctbupbit: debug
     org:
       springframework:
-        web: debug
+        web: info
