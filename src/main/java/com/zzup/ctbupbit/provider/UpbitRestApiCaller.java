@@ -21,6 +21,8 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
@@ -48,6 +50,10 @@ public class UpbitRestApiCaller {
      * group : candles
      */
     public List<CandleMinute> getMinuteCandleList(String marketCoinName, Integer minUnit, Integer count) throws NoSuchAlgorithmException, IOException {
+        return getMinuteCandleList(marketCoinName, minUnit, count, "");
+    }
+
+    public List<CandleMinute> getMinuteCandleList(String marketCoinName, Integer minUnit, Integer count, String to) throws NoSuchAlgorithmException, IOException {
 //        logger.debug("getMinuteCandleList");
 
         if (!callLimit.canICallApi("candles")) {
@@ -55,7 +61,14 @@ public class UpbitRestApiCaller {
         }
 
         List<CandleMinute> candleMinuteList = null;
+
         String uri = API_HOST + "/v1/candles/minutes/" + String.valueOf(minUnit) + "?market=" + marketCoinName + "&count=" + String.valueOf(count);
+        if (to.length() > 1) {
+            uri += "&to=" + URLEncoder.encode(to, "UTF-8");
+        }
+
+        logger.debug("uri = " + uri);
+
         try {
             HttpClient client = HttpClientBuilder.create().build();
             HttpGet request = new HttpGet(uri);
@@ -144,7 +157,7 @@ public class UpbitRestApiCaller {
                 orderResp = objectMapper.readValue(jsonStrResp, OrderResp.class);
                 retryCount = 3;
             } else {
-                logger.error(orderReq.getMarket() +" : "+ jsonStrResp);
+                logger.error(orderReq.getMarket() + " : " + jsonStrResp);
                 retryCount += 1;
 
                 try {
