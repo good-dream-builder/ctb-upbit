@@ -27,8 +27,10 @@ public class SellTrx implements BaseTrx {
     private final Double UPBIT_LIMIT_UNIT_PRICE = 5001.0;
     private final Double FEE_RATE = 0.0005;
 
-    // 매수, 매도 수수료 (0.05%) 각각의 2배.
-    private final Double LIMIT_RATE = 1.001;
+    // 매수, 매도 수수료 (0.05%) 각각의 2배.0.001 0.1%
+//    private final Double LIMIT_RATE = 1.001;
+    // 0.3% 이상이면 매도 하도록 한다.
+    private final Double LIMIT_RATE = 1.003;
 
     // [ Injection ]
     private UpbitRestApiCaller api;
@@ -63,7 +65,7 @@ public class SellTrx implements BaseTrx {
             final String currency = el.getCurrency();
             if (currency.equals("KRW")) {
                 krwAccount = el;
-            } else if (currency.equals("NPXS")) {
+            } else if (currency.equals("NPXS") || currency.contains("USDT") || currency.equals("XEC")) {
                 // TODO 제외대상 추가 영역
             } else if (Double.parseDouble(el.getAvg_buy_price()) > 0) {
                 UrgencyOp urgencyOp = urgencyOpService.getUrgencyOp();
@@ -125,11 +127,15 @@ public class SellTrx implements BaseTrx {
                     continue;
                 }
 
+//                final Double amount = Math.ceil(UPBIT_LIMIT_UNIT_PRICE / bidPrice)/100.0;
+//                logger.debug("{} 코인의 총 {} 개 중 {} 개를 매도합니다." + market, myAmount, amount);
+
                 // 1) 주문서 작성
                 OrderReq orderReq = new OrderReq();
                 orderReq.setMarket(market);
                 orderReq.setSide(OrderSide.SELL);
                 orderReq.setVolume(String.valueOf(myAmount));
+//                orderReq.setVolume(String.valueOf(amount));
                 orderReq.setPrice(String.valueOf(bidPrice));
 //                logger.debug("SellTrx::order::orderReq = " + orderReq);
 

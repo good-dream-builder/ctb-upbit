@@ -51,15 +51,18 @@ public class TrxContainer {
         this.scaleTradingTrx = scaleTradingTrx;
 
         trxList = new ArrayList<>();
-        trxList.add(this.sellTrx);
+//        trxList.add(this.sellTrx);
         trxList.add(this.buyTrx);
 
         changeTrxList = new ArrayList<>();
-        changeTrxList.add(this.stopLossTrx);
-        changeTrxList.add(this.scaleTradingTrx);
+        changeTrxList.add(this.sellTrx);
+//        changeTrxList.add(this.stopLossTrx);
+//        changeTrxList.add(this.scaleTradingTrx);
     }
 
-    @Scheduled(fixedDelayString = "12000")
+
+    //    @Scheduled(fixedDelayString = "12000")
+    @Scheduled(fixedDelayString = "600000")
     public void trx() {
         ServiceOpType serviceOpType = serviceOpService.getServiceOpType();
         if (serviceOpType != null) {
@@ -81,7 +84,9 @@ public class TrxContainer {
     }
 
 
-//    @Scheduled(cron = "0 30 23 * * ?")
+    //    @Scheduled(cron = "0 0 0/1 * * ?")
+//    @Scheduled(fixedDelayString = "12000")
+    @Scheduled(fixedDelayString = "12000")
     public void changeTrx() {
         ServiceOpType serviceOpType = serviceOpService.getServiceOpType();
         if (serviceOpType != null) {

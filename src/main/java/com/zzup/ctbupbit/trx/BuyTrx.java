@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zzup.ctbupbit.accounting.AccountBook;
 import com.zzup.ctbupbit.accounting.AccountBookRepository;
 import com.zzup.ctbupbit.accounting.AccountingService;
+import com.zzup.ctbupbit.common.CoinType;
 import com.zzup.ctbupbit.common.DealType;
 import com.zzup.ctbupbit.policy.CoinPolicyResult;
 import com.zzup.ctbupbit.policy.PolicyContainer;
@@ -29,6 +30,8 @@ public class BuyTrx implements BaseTrx {
 
     // [ Constants ]
 //    private final Double UNIT_PRICE = 5001.0;
+    private final Double UPBIT_LIMIT_UNIT_PRICE = 5001.0;
+
     private final Double FEE_RATE = 0.0005;
 
     // -30% 미만이면 사지 않는다.
@@ -39,6 +42,8 @@ public class BuyTrx implements BaseTrx {
 
     // 타겟 코인 갯수 비율(상위 %)
     private final Double TARGET_RATE = 1.0; // 100%
+
+    private final Double COIN_MONEY_LIMIT_RATE = 0.03; // BTC 외 코인 매수 %
 
     // 연속 매수 제한 횟수
     private final int CONTINUOUS_LIMIT_COUNT = 4;
@@ -79,7 +84,7 @@ public class BuyTrx implements BaseTrx {
             final String currency = el.getCurrency();
             if (currency.equals("KRW")) {
                 krwAccount = el;
-            } else if (currency.equals("NPXS")) {
+            } else if (currency.equals("NPXS") || currency.equals("USDT") || currency.equals("XEC")) {
                 // TODO 제외대상 추가 영역
             } else if (Double.parseDouble(el.getAvg_buy_price()) > 0) {
                 UrgencyOp urgencyOp = urgencyOpService.getUrgencyOp();
@@ -135,17 +140,34 @@ public class BuyTrx implements BaseTrx {
                     myPrice = Double.parseDouble(myAccount.getAvg_buy_price());
 
                     /**
+                     * BTC가 아니면 전체 금액의 n%만 구매 한다.
+                     */
+                    if (market.contains(CoinType.BTC.getType()) == false) {
+                        Double balance = Double.parseDouble(myAccount.getBalance());
+                        Double coinMoney = myPrice * balance;
+                        Double coinLimitMoney = myMoney * COIN_MONEY_LIMIT_RATE;
+
+                        boolean isNeedToPass = coinMoney > coinLimitMoney;
+                        logger.debug("{} 의 보유액은 {}원이며, 최대 보유 가능은 {}원 으로 {} 합니다.", market, String.format("%.2f", coinMoney), String.format("%.2f", coinLimitMoney), isNeedToPass ? "통과" : "추매");
+                        if (coinMoney > coinLimitMoney) {
+                            continue;
+                        }
+                    }
+
+                    /**
                      * (정책) -30% 미만이면 매수 하지 않는다.
                      */
                     Double diffPrice = bidPrice - myPrice;
                     Double diffRate = diffPrice / myPrice;
                     if (diffRate < STOP_BUY_RATE) {
-                        logger.debug(market + " : " + (STOP_BUY_RATE * 100) +"%를 초과하여 구매하지 않습니다. = " + (diffRate * 100));
+                        logger.debug(market + " : " + (STOP_BUY_RATE * 100) + "%를 초과하여 구매하지 않습니다. = " + (diffRate * 100));
                         continue;
                     }
 
 //                    logger.debug("BuyTrx::order::myPrice = " + myPrice);
 
+                    /*
+                    // FIXME 지속 매수를 위해 임의로 막음
                     // 이전 거래 내역 3개를 가져온다.
                     List<AccountBook> accountBookList = accountingService.getLast5AccountBookListByCoin(market);
 //                    logger.debug("BuyTrx::order::accountBookList = " + accountBookList);
@@ -165,6 +187,7 @@ public class BuyTrx implements BaseTrx {
                         }
                     }
 
+
                     // 연속으로 4번 매수한 경우, 마지막 거래 가격으로 비교 기준가를 정한다.
                     if (isContinuousBuy == true) {
                         logger.debug(market + " : " + CONTINUOUS_LIMIT_COUNT +"번 이상 반복 구매하여, 가격을 조정합니다.");
@@ -180,22 +203,38 @@ public class BuyTrx implements BaseTrx {
                             myLimitPrice = myPrice;
                         }
                     }
+                     */
 
 //                    logger.debug("BuyTrx::order::myLimitPrice = " + myLimitPrice);
+                    // FIXME 지속 매수를 위해 제한가를 내 평단가로 설정한다.
+                    myLimitPrice = myPrice;
                 }
 
 //                logger.debug("BuyTrx::order::myAccount = " + myAccount);
 //                logger.debug("BuyTrx::order::bidPrice = " + bidPrice);
 //                logger.debug("BuyTrx::order::askPrice = " + askPrice);
 
-                // 시장 매수 호가가 제한가(현재가 혹은 마지막 거래가) 보다 -1.2% 이하 인 경우 에만 주문한다.
-                myLimitPrice = myLimitPrice * LIMIT_RATE;
+                // 시장 매수 호가가 제한가(현재가 혹은 마지막 거래가) 보다 n% 이하 인 경우 에만 주문한다.
+                // FIXME 지속 매수를 위해 임시로 막고, 내 평단가 보다 낮으면 산다.
+                // myLimitPrice = myLimitPrice * LIMIT_RATE;
+
 //                logger.debug("BuyTrx::order::myLimitPrice * LIMIT_RATE = " + myLimitPrice);
 //                logger.debug("myLimitPrice = " + myLimitPrice + ", askPrice = " + askPrice);
 
+                logger.debug("{} 의 제한금액은 {}원이며, 호가는 {}원 입니다.", market, String.format("%.2f", myLimitPrice), String.format("%.2f", askPrice));
+
                 if (myLimitPrice > askPrice) {
                     // 1) 주문서 작성
-                    final Double amount = UNIT_PRICE / askPrice;
+                    
+                    // FIXME 지속적 매수를 하되, BTC를 제외하고는 5,001원씩 구매함
+                    Double orderUnitPrice = UNIT_PRICE;
+                    if (market.contains(CoinType.BTC.getType()) == false) {
+                        orderUnitPrice = UPBIT_LIMIT_UNIT_PRICE;
+                    }
+
+                    final Double amount = orderUnitPrice / askPrice;
+//                    final Double amount = UNIT_PRICE / askPrice;
+
 
                     OrderReq orderReq = new OrderReq();
                     orderReq.setMarket(market);
