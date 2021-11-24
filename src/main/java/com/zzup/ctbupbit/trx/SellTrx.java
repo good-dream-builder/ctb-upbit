@@ -65,7 +65,7 @@ public class SellTrx implements BaseTrx {
             final String currency = el.getCurrency();
             if (currency.equals("KRW")) {
                 krwAccount = el;
-            } else if (currency.equals("NPXS") || currency.contains("USDT") || currency.equals("XEC")) {
+            } else if (currency.equals("NPXS") || currency.contains("USDT")) {
                 // TODO 제외대상 추가 영역
             } else if (Double.parseDouble(el.getAvg_buy_price()) > 0) {
                 UrgencyOp urgencyOp = urgencyOpService.getUrgencyOp();
@@ -127,9 +127,8 @@ public class SellTrx implements BaseTrx {
                     continue;
                 }
 
-
                 final Double unitAmount = Math.ceil((UPBIT_LIMIT_UNIT_PRICE / bidPrice) * 100) / 100.0;
-                logger.debug("{} 코인의 총 {} 개 중 {} 개를 매도합니다." + market, myAmount, unitAmount);
+                logger.debug("{} 코인의 총 {} 개 중 {} 개를 매도합니다.", market, myAmount, unitAmount);
 
                 // 1) 주문서 작성
                 OrderReq orderReq = new OrderReq();

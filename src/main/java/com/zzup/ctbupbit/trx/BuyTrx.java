@@ -87,7 +87,7 @@ public class BuyTrx implements BaseTrx {
                 krwAccount = el;
 
                 investTotalMoney = investTotalMoney + Double.parseDouble(el.getBalance());
-            } else if (currency.equals("NPXS") || currency.equals("USDT") || currency.equals("XEC")) {
+            } else if (currency.equals("NPXS") || currency.equals("USDT")) {
                 // TODO 제외대상 추가 영역
             } else if (Double.parseDouble(el.getAvg_buy_price()) > 0) {
                 UrgencyOp urgencyOp = urgencyOpService.getUrgencyOp();

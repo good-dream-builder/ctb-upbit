@@ -62,7 +62,8 @@ public class TrxContainer {
 
 
     //    @Scheduled(fixedDelayString = "600000")
-    @Scheduled(fixedDelayString = "30000")
+//    @Scheduled(fixedDelayString = "30000")
+    @Scheduled(fixedDelayString = "600000")
     public void trx() {
         ServiceOpType serviceOpType = serviceOpService.getServiceOpType();
         if (serviceOpType != null) {
