@@ -79,11 +79,14 @@ public class BuyTrx implements BaseTrx {
         // Step1. 내 계좌 정보를 가져온다.
         List<Account> accountList = api.getAccountList();
         Map<String, Account> accountMap = new HashMap<>();
+        Double investTotalMoney = 0.0;
         Account krwAccount = null;
         for (Account el : accountList) {
             final String currency = el.getCurrency();
             if (currency.equals("KRW")) {
                 krwAccount = el;
+
+                investTotalMoney = investTotalMoney + Double.parseDouble(el.getBalance());
             } else if (currency.equals("NPXS") || currency.equals("USDT") || currency.equals("XEC")) {
                 // TODO 제외대상 추가 영역
             } else if (Double.parseDouble(el.getAvg_buy_price()) > 0) {
@@ -91,6 +94,8 @@ public class BuyTrx implements BaseTrx {
                 if (currency.equals(urgencyOp.getTarget()) == false) {
                     String market = "KRW-" + currency;
                     accountMap.put(market, el);
+
+                    investTotalMoney = investTotalMoney + (Double.parseDouble(el.getBalance()) * Double.parseDouble(el.getAvg_buy_price()));
                 }
             }
         }

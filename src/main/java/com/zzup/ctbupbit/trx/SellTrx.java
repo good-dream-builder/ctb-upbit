@@ -127,15 +127,15 @@ public class SellTrx implements BaseTrx {
                     continue;
                 }
 
-//                final Double amount = Math.ceil(UPBIT_LIMIT_UNIT_PRICE / bidPrice)/100.0;
-//                logger.debug("{} 코인의 총 {} 개 중 {} 개를 매도합니다." + market, myAmount, amount);
+                final Double amount = Math.ceil((UPBIT_LIMIT_UNIT_PRICE / bidPrice) * 100)/100.0;
+                logger.debug("{} 코인의 총 {} 개 중 {} 개를 매도합니다." + market, myAmount, amount);
 
                 // 1) 주문서 작성
                 OrderReq orderReq = new OrderReq();
                 orderReq.setMarket(market);
                 orderReq.setSide(OrderSide.SELL);
-                orderReq.setVolume(String.valueOf(myAmount));
-//                orderReq.setVolume(String.valueOf(amount));
+//                orderReq.setVolume(String.valueOf(myAmount));
+                orderReq.setVolume(String.valueOf(amount));
                 orderReq.setPrice(String.valueOf(bidPrice));
 //                logger.debug("SellTrx::order::orderReq = " + orderReq);
 

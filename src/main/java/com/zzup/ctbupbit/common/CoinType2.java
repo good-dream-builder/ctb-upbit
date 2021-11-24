@@ -120,7 +120,8 @@ public enum CoinType2 {
     SAND("SAND"), // 샌드박스
     HUM("HUM"), // 휴먼스케이프
     BTG("BTG"), // 비트코인골드
-    DOGE("DOGE") // 도지코인
+    DOGE("DOGE"), // 도지코인
+    _1INCH("1INCH") // 1인치네트워크
     ;
     private final String type;
 }
