@@ -41,7 +41,7 @@ logging:
     file: "[%d{yyyy:MM:dd HH:mm:ss.SSS}][%-5level][%logger.%method:line%line] - %msg%n"
     rolling-file-name: "/root/ctb_upbit_log/ctb_log.%d{yyyy-MM-dd}.%i"
   file:
-    path: /root/ctb_upbit_log
+    path: /root/log
 #  config: classpath:logback-spring_xml
   level:
     com:

@@ -61,8 +61,8 @@ public class TrxContainer {
     }
 
 
-    //    @Scheduled(fixedDelayString = "12000")
-    @Scheduled(fixedDelayString = "600000")
+    //    @Scheduled(fixedDelayString = "600000")
+    @Scheduled(fixedDelayString = "30000")
     public void trx() {
         ServiceOpType serviceOpType = serviceOpService.getServiceOpType();
         if (serviceOpType != null) {
@@ -86,7 +86,7 @@ public class TrxContainer {
 
     //    @Scheduled(cron = "0 0 0/1 * * ?")
 //    @Scheduled(fixedDelayString = "12000")
-    @Scheduled(fixedDelayString = "12000")
+    @Scheduled(fixedDelayString = "3000")
     public void changeTrx() {
         ServiceOpType serviceOpType = serviceOpService.getServiceOpType();
         if (serviceOpType != null) {
