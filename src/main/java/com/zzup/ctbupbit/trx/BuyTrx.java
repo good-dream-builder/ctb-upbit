@@ -43,6 +43,7 @@ public class BuyTrx implements BaseTrx {
     // 타겟 코인 갯수 비율(상위 %)
     private final Double TARGET_RATE = 1.0; // 100%
 
+    private final Double BTC_MONEY_LIMIT_RATE = 0.5; // BTC 코인 매수 %
     private final Double COIN_MONEY_LIMIT_RATE = 0.03; // BTC 외 코인 매수 %
 
     // 연속 매수 제한 횟수
@@ -147,17 +148,32 @@ public class BuyTrx implements BaseTrx {
                     /**
                      * BTC가 아니면 전체 금액의 n%만 구매 한다.
                      */
-                    if (market.contains(CoinType.BTC.getType()) == false) {
-                        Double balance = Double.parseDouble(myAccount.getBalance());
-                        Double coinMoney = myPrice * balance;
-                        Double coinLimitMoney = myMoney * COIN_MONEY_LIMIT_RATE;
+//                    if (market.contains(CoinType.BTC.getType()) == false) {
+//                        Double balance = Double.parseDouble(myAccount.getBalance());
+//                        Double coinMoney = myPrice * balance;
+//                        Double coinLimitMoney = myMoney * COIN_MONEY_LIMIT_RATE;
+//
+//                        boolean isNeedToPass = coinMoney > coinLimitMoney;
+//                        logger.debug("{} 의 보유액은 {}원이며, 최대 보유 가능은 {}원 으로 {} 합니다.", market, String.format("%.2f", coinMoney), String.format("%.2f", coinLimitMoney), isNeedToPass ? "통과" : "추매");
+//                        if (coinMoney > coinLimitMoney) {
+//                            continue;
+//                        }
+//                    }
 
-                        boolean isNeedToPass = coinMoney > coinLimitMoney;
-                        logger.debug("{} 의 보유액은 {}원이며, 최대 보유 가능은 {}원 으로 {} 합니다.", market, String.format("%.2f", coinMoney), String.format("%.2f", coinLimitMoney), isNeedToPass ? "통과" : "추매");
-                        if (coinMoney > coinLimitMoney) {
-                            continue;
-                        }
+                    Double balance = Double.parseDouble(myAccount.getBalance());
+                    Double coinMoney = myPrice * balance;
+
+                    Double coinMoneyLimitRate = COIN_MONEY_LIMIT_RATE;
+                    if(market.contains(CoinType.BTC.getType()) == true) coinMoneyLimitRate = BTC_MONEY_LIMIT_RATE;
+                    Double coinLimitMoney = myMoney * coinMoneyLimitRate;
+
+                    boolean isNeedToPass = coinMoney > coinLimitMoney;
+                    logger.debug("{} 의 보유액은 {}원이며, 최대 보유 가능은 {}원 으로 {} 합니다.", market, String.format("%.2f", coinMoney), String.format("%.2f", coinLimitMoney), isNeedToPass ? "통과" : "추매");
+                    if (coinMoney > coinLimitMoney) {
+                        continue;
                     }
+
+
 
                     /**
                      * (정책) -30% 미만이면 매수 하지 않는다.
